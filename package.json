@@ -1,0 +1,15 @@
+{
+  "name": "token-radar-01",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Token launch radar: pre-token protocols from a sealed DefiLlama snapshot, priced by peer-calibrated comparables, with a static dashboard and a farm plan for every row.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "MAKEFUN_OUTPUT_DIR=out node main.ts --input input/snapshot.json",
+    "build": "MAKEFUN_OUTPUT_DIR=out node main.ts --input input/snapshot.json"
+  }
+}
