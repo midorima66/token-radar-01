@@ -9,7 +9,7 @@ protocol DefiLlama tracks, finds the ones that record no token yet, prices each 
 protocols in its own category whose token already trades, and hands in a static web dashboard with
 the ranked board, a detail view for every protocol, and a concrete farm plan for every row.
 
-**Model `comps-1`** — peer-calibrated comparables, not a flat multiple:
+**Model `comps-2`** — peer-calibrated comparables, not a flat multiple:
 
 ```
 implied value = TVL × category multiple × growth multiplier × maturity multiplier
@@ -26,11 +26,17 @@ implied value = TVL × category multiple × growth multiplier × maturity multip
   the longer it has run at scale with no token on record, the more value the model credits.
 
 The board covers **all 40 watchlist protocols** (TVL ≥ $50M, no token on record, not a wrapped or
-staked product) and adds **186 early rows** — every other rankable pre-token protocol in the snapshot —
-for **226 rows** in all. The 133 tokenized protocols are never ranked; they are the calibration
+staked product) and adds **138 early rows** — every other rankable pre-token protocol in the snapshot —
+for **178 rows** in all. "Rankable" applies the snapshot's own watchlist rule to the early board too:
+a protocol whose category is Bridge, Canonical Bridge, Liquid Staking, Liquid Restaking or Restaked
+BTC, whose name carries the whole word *wrapped*, *staked* or *staking*, or that opens with an
+exchange's name is a product of a token that already trades, so it is never ranked as pre-token
+(comps-2 removed 48 such rows that comps-1 had ranked; every surviving row keeps its comps-1 value).
+The 133 tokenized protocols are never ranked; they are the calibration
 universe, shown on the dashboard's *Live tokens* view. No protocol name is special-cased anywhere:
 one function prices every row, and the dashboard shows each row's multiple, peer count, band, and
-the peers behind its price.
+the peers behind its price. Protocols with no category on record are priced at the global median,
+and the Method view advertises no multiple the model does not use.
 
 ## Run it
 
