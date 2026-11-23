@@ -79,7 +79,7 @@ export const MODEL: ModelConstants = {
 };
 
 /** The model's version label: the dashboard names it and the board's rows carry it. */
-export const MODEL_VERSION = 'comps-1';
+export const MODEL_VERSION = 'comps-2';
 
 /** How many live-token protocols the dashboard's Live token view carries, by market cap. */
 export const LIVE_ROWS = 60;
@@ -289,6 +289,10 @@ export function calibrate(snapshot: Snapshot, model: ModelConstants = MODEL): Ca
   const categories: CategoryCal[] = [];
   const byCategory = new Map<string, CategoryCal>();
   for (const [category, list] of peers_by_category) {
+    // Peers with no recorded category still count toward the global calibration and the peer
+    // lists, but they are not a category: calFor routes category-less protocols to the global
+    // fallback, so no "Uncategorized" multiple may be published for the Method view to advertise.
+    if (category === 'Uncategorized') continue;
     const ratios = list.map((p) => p.ratio).sort((a, b) => a - b);
     const cal: CategoryCal = {
       category,
@@ -366,9 +370,28 @@ export function isPreToken(p: SnapshotProtocol): boolean {
   return p.mcap_usd === null && p.gecko_id === null && p.symbol === null;
 }
 
-/** Whether a protocol is one the board may rank: pre-token, not an exchange, not a versioned pool. */
+/** Categories that are products of a token that already trades, per the snapshot's watchlist rule. */
+const TRADED_PRODUCT_CATEGORIES = new Set(['CEX', 'Bridge', 'Canonical Bridge', 'Liquid Staking', 'Liquid Restaking', 'Restaked BTC']);
+
+/** A name carrying one of these as a whole word marks a wrapped or staked product of another token. */
+const WRAPPED_WORD = /\b(wrapped|staked|staking)\b/i;
+
+/** A name opening with an exchange's name is that exchange's own product. */
+const EXCHANGE_PREFIX = /^(binance|coinbase|bybit|kraken|bitget|okx|bitfinex|gemini)\b/i;
+
+/**
+ * Whether a protocol is one the board may rank: pre-token, and not a wrapped, staked, bridged or
+ * exchange product of a token that already trades — the same rule the snapshot's own watchlist
+ * follows, so the early board and the watchlist apply one definition of "still to come".
+ */
 export function isRankable(p: SnapshotProtocol): boolean {
-  return isPreToken(p) && p.category !== 'CEX' && !VERSIONED.test(p.name);
+  return (
+    isPreToken(p) &&
+    !(p.category !== null && TRADED_PRODUCT_CATEGORIES.has(p.category)) &&
+    !VERSIONED.test(p.name) &&
+    !WRAPPED_WORD.test(p.name) &&
+    !EXCHANGE_PREFIX.test(p.name)
+  );
 }
 
 /** The headline figures: how many watchlist slugs, how many rows, how many live protocols. */
